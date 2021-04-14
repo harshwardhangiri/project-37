@@ -1,19 +1,19 @@
-var dog,Dog,happyDog, database;
+var dog,Dog,happyDog,milk , database;
 var foodS,foodStock;
 var fedTime,lastFed;
 var feed,addFood;
 var foodObj;
 var gameState = 0;
-var bedrom,bedroomimg,garden,gardenimg,washroom,washroomimg;
+var bedroomimg,gardenimg,washroomimg;
 
 function preload(){
-Dog=loadImage("images/dogImg.png");
-happyDog=loadImage("images/dogImg1.png");
+Dog=loadImage("images/Dog.png");
+happyDog=loadImage("images/Happy.png");
 milk=loadImage("images/MilkBottleImage.png");
-bedroomimg=loadImage("images/MilkBottleImage.png");
-gardenimg=loadImage("images/MilkBottleImage.png");
-washroomimg=loadImage("images/MilkBottleImage.png");
-//sadDog = loadImage("")
+bedroomimg =loadImage("images/Bed Room.png");
+gardenimg =loadImage("images/Garden.png");
+washroomimg =loadImage("images/Wash Room.png");
+sadDog = loadImage("images/deadDog.png")
 }
 
 function setup() {
@@ -21,6 +21,11 @@ function setup() {
   createCanvas(1000,400);
 
   foodObj = new Food();
+
+  readState = database.ref('gameState');
+  readState.on("value",function(data){
+    gameState = data.val();
+});
 
   foodStock=database.ref('Food');
   foodStock.on("value",readStock);
@@ -42,7 +47,7 @@ function setup() {
 
 function draw() {
   background(46,139,87);
-  foodObj.display();
+  //foodObj.display();
 
   fedTime=database.ref('FeedTime');
   fedTime.on("value",function(data){
@@ -67,18 +72,19 @@ if (gameState!="Hungry"){
   dog.remove();
 }else{
   feed.show();
-  addFood.show();dog.addImage(sadDog);
+  addFood.show();
+  dog.addImage(sadDog);
 }
-currentTime = hour();
+ currentTime = hour();
    if(currentTime==(lastFed+1)){
      update("Playing");
-     foodObj.Garden();
+     garden();
 }else if(currentTime==(lastFed+2)){
   update("Sleeping");
-    foodObj.bedRoom();
+    foodObj.bedroom();
 }else if (currentTime>(lastFed+2)&&currentTime<=(lastFed+4)){
   update("Bathing")
-  foodObj.washRoom();
+  washroom();
 }else{
   update("Hungry");
   foodObj.display();
@@ -95,10 +101,11 @@ function readStock(data){
 
 
 function feedDog(){
-  dog.addImage(happyDog);
-
+  
   imageMode(CENTER);
   image(milk,680,250,100,100);
+  dog.addImage(happyDog);
+
   
   if(foodObj.getFoodStock()<= 0){
     foodObj.updateFoodStock(foodObj.getFoodStock()*0);
@@ -119,4 +126,22 @@ function addFoods(){
   })
 }
 
- 
+function update(state){
+  database.ref('/').update({
+    gameState: state
+  });
+}
+
+
+
+function bedroom(){
+  background(bedroomimg,550,500);
+}
+
+ function garden(){
+  background(gardenimg,550,500);
+}
+
+function washroom(){
+  background(washroomimg,550,500);
+}
